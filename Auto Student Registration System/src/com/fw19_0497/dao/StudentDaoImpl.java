@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import com.fw19_0497.exceptions.CourseException;
 import com.fw19_0497.exceptions.StudentException;
 import com.fw19_0497.model.Student;
 import com.fw19_0497.utility.DBUtil;
@@ -57,4 +58,39 @@ public Student logIn(String username, String password) throws StudentException {
 	}
 	return student;
   }
+
+@Override
+public String courseEnrollment(int roll, int cid) throws StudentException, CourseException {
+	String message= "Not Erolled....!";
+	
+	try(Connection conn= DBUtil.provideConnection()) {
+		
+		PreparedStatement ps1= conn.prepareStatement("select * from student where roll =?");
+		ps1.setInt(1, roll);
+		ResultSet rs = ps1.executeQuery();
+		if(rs.next()) {
+			PreparedStatement ps2= conn.prepareStatement("select * from course where cid =?");
+			ps2.setInt(1, cid);
+			ResultSet rs2= ps2.executeQuery();
+			if(rs2.next()) {
+				PreparedStatement ps3= conn.prepareStatement("insert into student_course values(?,?)");
+				ps3.setInt(1, cid);
+				ps3.setInt(2, roll);
+				int x=ps3.executeUpdate();
+				if(x>0) {
+					message= "Student enrolled successfully..";
+				}
+			}
+			else {
+				throw new CourseException("Invalid COurse Id: "+cid);
+			}
+		}
+		
+	} catch (SQLException e) {
+		e.printStackTrace();
+		throw new CourseException(e.getMessage());
+	}
+	
+	return message;
+   }
 }
