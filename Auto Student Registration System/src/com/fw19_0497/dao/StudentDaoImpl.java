@@ -2,6 +2,7 @@ package com.fw19_0497.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.fw19_0497.exceptions.StudentException;
@@ -32,4 +33,28 @@ public class StudentDaoImpl implements StudentDao {
 	}
 	   return result;
    }
+
+@Override
+public Student logIn(String username, String password) throws StudentException {
+	Student student = null;
+	try(Connection conn =DBUtil.provideConnection()) {
+		
+		PreparedStatement ps=  conn.prepareStatement("select * from student where email=? AND password=?");
+		ps.setString(1,username);
+		ps.setString(2, password);
+		
+		ResultSet rs = ps.executeQuery();
+		if(rs.next()) {
+			student = new Student(rs.getInt("roll"),rs.getString("name"), rs.getString("address"),rs.getString("email"), rs.getString("password"));
+		}
+		else {
+			throw new StudentException("Invalid Username or password..");
+		}
+		
+	} catch (SQLException e) {
+		e.printStackTrace();
+		throw new StudentException(e.getMessage());
+	}
+	return student;
+  }
 }

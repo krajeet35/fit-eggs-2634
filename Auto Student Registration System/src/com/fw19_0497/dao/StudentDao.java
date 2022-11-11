@@ -6,5 +6,6 @@ import com.fw19_0497.model.Student;
 public interface StudentDao {
 	
 	public String registerStudent(Student student) throws StudentException;
+	public Student logIn(String username, String password) throws StudentException;
 
 }
